@@ -755,7 +755,7 @@ data.completed = !data.completed;
     }
 
     function resetData() {
-        if(confirm('確定要清空月曆計畫的所有內容嗎？')) {
+        if(confirm('確定要清空月曆計畫的所有內容嗎？(並不重設你自訂的溫習項目)')) {
             for(let i=1; i<=28; i++) localStorage.removeItem(`${appId}_cell_${i}`);
 renderCalendar();
         }
