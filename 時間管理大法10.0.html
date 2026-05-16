@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機械速食式溫習功法 - 時間管理大法</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300;400;500&family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mocha: #6F4E37;
+        --latte: #C0A080;
+            --cream: #F5EBE0;
+            --paper: #FFF9F2;
+            --accent: #D4A373;
+            --completed-bg: #E5E5E5;
+            --completed-text: #999999;
+    }
+
+        body {
+            background-color: var(--cream);
+    color: var(--mocha);
+            font-family: 'Kiwi Maru', 'Zen Maru Gothic', serif;
+            margin: 0;
+            padding: 10px;
+            touch-action: manipulation;
+    }
+
+        @media (min-width: 768px) {
+            body { padding: 20px;
+    }
+        }
+
+        .notebook-container {
+            max-width: 1200px;
+    margin: 0 auto;
+            background-color: var(--paper);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(111, 78, 55, 0.15);
+    border: 3px solid var(--latte);
+        }
+
+        @media (min-width: 768px) {
+            .notebook-container { padding: 30px;
+        border-radius: 30px; }
+        }
+
+        .tab-group {
+            display: flex;
+    gap: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        .tab-btn {
+            padding: 10px 24px;
+    border-radius: 15px 15px 0 0;
+            border: 2px solid var(--latte);
+            border-bottom: none;
+            background: #EFE5D9;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+    font-size: 0.95rem;
+            color: var(--mocha);
+            opacity: 0.8;
+        }
+        .tab-btn.active {
+            background: var(--paper);
+    opacity: 1;
+            padding-bottom: 12px;
+            margin-bottom: -2px;
+            z-index: 5;
+        }
+
+        .view-content { display: none;
+    }
+        .view-content.active { display: block;
+    }
+
+        .title-banner {
+            text-align: center;
+    border-bottom: 2px dashed var(--latte);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+    font-weight: 700;
+            color: var(--mocha);
+        }
+
+        @media (min-width: 768px) {
+            h1 { font-size: 2.2rem;
+    }
+        }
+
+        .block-area {
+            background: #EFE5D9;
+    padding: 12px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+    }
+
+        .draggable-item {
+            background: white;
+    padding: 6px 10px;
+            border-radius: 10px;
+            border: 1.5px solid var(--latte);
+            cursor: grab;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+    user-select: none;
+            touch-action: none;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+    opacity: 0.6;
+        }
+
+        .calendar-scroll-wrapper {
+            width: 100%;
+    overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        .calendar-grid {
+            display: grid;
+    grid-template-columns: repeat(7, minmax(130px, 1fr)); 
+            gap: 6px;
+            min-width: 950px;
+        }
+
+        @media (min-width: 1024px) {
+            .calendar-grid { min-width: auto;
+        gap: 8px; }
+        }
+
+        .day-header {
+            text-align: center;
+    font-weight: bold;
+            padding: 6px;
+            background-color: var(--latte);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.75rem;
+    }
+
+        .day-cell {
+            min-height: 150px;
+    border: 1.5px solid #EFE5D9;
+            border-radius: 12px;
+            padding: 8px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+    transition: background-color 0.2s;
+        }
+
+        .day-cell.drag-over {
+            background-color: #FDF2E9;
+    border-color: var(--accent);
+        }
+
+        .day-cell.is-completed { background-color: var(--completed-bg) !important; opacity: 0.7;
+    }
+        
+        .cell-top { display: flex;
+    justify-content: space-between; align-items: center; }
+        .cell-date { font-size: 0.7rem; color: var(--latte); font-weight: bold;
+    }
+
+        .complete-toggle {
+            cursor: pointer;
+    width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1.2px solid var(--latte);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            background: white;
+    }
+
+        .is-completed .complete-toggle { background: var(--mocha); color: white;
+    }
+
+        .input-area {
+            width: 100%;
+    border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            outline: none;
+            background: #FDFBFA;
+            padding: 4px;
+    }
+
+        .exam-tag { background-color: #FFEDD5; font-weight: bold;
+    }
+        .study-tag { background-color: #E0F2FE;
+    }
+
+        .note-section {
+            margin-top: 20px;
+    display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) { .note-section { grid-template-columns: 1fr 1fr;
+    } }
+
+        .controls {
+            display: flex;
+    flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 1024px) {
+            .controls { flex-direction: row;
+        justify-content: space-between; align-items: center; }
+        }
+
+        .btn-group {
+            display: flex;
+    flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-main {
+            background-color: var(--mocha);
+    color: white;
+            padding: 10px 14px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            border: none;
+            flex: 1 1 auto;
+            text-align: center;
+    min-width: 100px;
+        }
+
+        .btn-download { background-color: #D4A373;
+    }
+        .btn-method { background-color: #8EACCD;
+    }
+
+        .daily-table { width: 100%; border-collapse: separate; border-spacing: 0 8px;
+    }
+        .daily-table th { background: var(--latte); color: white; padding: 10px; font-size: 0.85rem;
+    border-radius: 5px; text-align: center; }
+        
+        .daily-row { background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s; cursor: default;
+    }
+        .daily-row.dragging { opacity: 0.5; background: #fdf2e9; border: 2px dashed var(--latte);
+    }
+        .daily-row td { padding: 12px 10px; border-top: 1.5px solid #EFE5D9;
+    border-bottom: 1.5px solid #EFE5D9; vertical-align: middle; }
+        .daily-row td:first-child { border-left: 1.5px solid #EFE5D9;
+    border-radius: 12px 0 0 12px; }
+        .daily-row td:last-child { border-right: 1.5px solid #EFE5D9;
+    border-radius: 0 12px 12px 0; }
+        
+        .drag-handle { cursor: grab;
+    color: var(--latte); padding: 0 5px; font-size: 1.2rem; user-select: none; touch-action: none;
+    }
+        .drag-handle:active { cursor: grabbing;
+    }
+
+        .timer-display { font-family: monospace; font-weight: bold; color: #d97706; font-size: 1.15rem;
+    }
+        .timer-expired { color: #ef4444;
+    }
+        
+        .status-badge { padding: 3px 10px;
+    border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .status-success { background: #dcfce7; color: #166534;
+    }
+        .status-fail { background: #fee2e2; color: #991b1b;
+    }
+        .status-pending { background: #f3f4f6; color: #4b5563;
+    }
+
+        .editable-cell { cursor: cell; position: relative;
+    }
+        .editable-cell:hover::after {
+            content: "雙擊可編輯";
+        position: absolute;
+            bottom: -5px;
+            right: 5px;
+            font-size: 8px;
+            color: var(--latte);
+            opacity: 0.6;
+    }
+
+        #touch-ghost {
+            position: fixed;
+        pointer-events: none;
+            z-index: 9999;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1.5px solid var(--latte);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        font-size: 0.85rem;
+            display: none;
+            opacity: 0.9;
+        }
+
+        /* 放大倒數畫面彈窗全新樣式 - 完美融合原設計 */
+        #zoom-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(111, 78, 55, 0.4);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .zoom-modal-box {
+            background-color: var(--paper);
+            border: 3px solid var(--latte);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px 20px;
+            box-shadow: 0 15px 35px rgba(111, 78, 55, 0.25);
+            position: relative;
+            text-align: center;
+        }
+
+        .zoom-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--latte);
+            font-weight: bold;
+            transition: color 0.2s;
+            user-select: none;
+        }
+        .zoom-close-btn:hover {
+            color: var(--mocha);
+        }
+
+        .zoom-section-box {
+            border: 3px solid var(--latte);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: white;
+            font-weight: bold;
+        }
+
+        .zoom-task-title {
+            font-size: 1.4rem;
+            color: var(--mocha);
+        }
+
+        .zoom-timer-display {
+            font-family: monospace;
+            font-weight: bold;
+            color: #d97706;
+            font-size: 3.5rem;
+            line-height: 1;
+            padding: 10px 0;
+        }
+        .zoom-timer-expired {
+            color: #ef4444;
+        }
+
+        @media print {
+            body { background: white !important;
+        padding: 0 !important; margin: 0 !important; }
+            
+            .no-print, 
+            .tab-group, 
+            .complete-toggle, 
+            .controls, 
+            .block-area, 
+            .note-section,
+            #zoom-modal-overlay,
+     
+        .text-center.mt-10.opacity-30 { display: none !important;
+    }
+            
+            .view-content { display: none !important;
+    }
+            .view-content.active { display: block !important; width: 100% !important;
+        margin: 0 !important; padding: 0 !important; }
+
+            .notebook-container { 
+                box-shadow: none !important;
+        border: none !important; 
+                width: 100% !important; 
+                max-width: 100% !important; 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                background: white !important;
+        }
+
+            .title-banner { border-bottom: 2px solid #000 !important;
+        }
+            
+            #daily-view.active .daily-table { 
+                width: 100% !important;
+        border-spacing: 0 !important; 
+                border-collapse: collapse !important;
+            }
+            #daily-view.active .daily-table th { 
+                background: #f3f4f6 !important;
+        color: #000 !important; 
+                border: 1px solid #000 !important; 
+                -webkit-print-color-adjust: exact;
+        }
+            #daily-view.active .daily-row td { 
+                border: 1px solid #000 !important;
+        padding: 8px !important;
+                border-radius: 0 !important;
+            }
+            #daily-view.active th:first-child, 
+            #daily-view.active td:first-child,
+            #daily-view.active th:last-child, 
+            #daily-view.active td:last-child { display: none !important;
+        }
+            
+            #calendar-view.active .calendar-scroll-wrapper { overflow: visible !important;
+        }
+            #calendar-view.active .calendar-grid { 
+                min-width: 100% !important;
+        grid-template-columns: repeat(7, 1fr) !important; 
+                gap: 2px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="touch-ghost"></div>
+
+<div id="zoom-modal-overlay" onclick="closeZoomModal(event)">
+    <div class="zoom-modal-box" onclick="event.stopPropagation()">
+        <span class="zoom-close-btn" onclick="closeZoomModal(null)">✕</span>
+        
+        <div class="zoom-section-box">
+            項目名稱：<span id="zoom-task-name" class="zoom-task-title">-</span>
+        </div>
+        
+        <div class="zoom-section-box">
+            <div id="zoom-timer-display" class="zoom-timer-display">00:00</div>
+        </div>
+        
+        <div class="flex gap-2 justify-center mt-4">
+            <button id="zoom-btn-start" onclick="zoomTriggerToggle()" class="px-4 py-2 rounded-xl font-bold text-sm bg-amber-600 text-white shadow active:scale-95 transition-all">▶ 開始</button>
+            <button id="zoom-btn-finish" onclick="zoomTriggerFinish()" class="px-4 py-2 rounded-xl font-bold text-sm bg-red-500 text-white shadow active:scale-95 transition-all">🛑 結束</button>
+            <button id="zoom-btn-reset" onclick="zoomTriggerReset()" class="px-4 py-2 rounded-xl font-bold text-sm bg-gray-500 text-white shadow active:scale-95 transition-all">🕒 重新</button>
+        </div>
+    </div>
+</div>
+
+<div class="notebook-container">
+    
+    <div class="tab-group no-print">
+        <button id="btn-calendar" class="tab-btn active" onclick="switchTab('calendar-view')">📅 月曆計畫表</button>
+        <button id="btn-daily" class="tab-btn" onclick="switchTab('daily-view')">⏱️ 每日時間表</button>
+    </div>
+
+    <div id="calendar-view" class="view-content active">
+        <div class="title-banner">
+            <h1>🧸 溫習時間管理大法</h1>
+           
+        <p class="text-[10px] md:text-sm opacity-80 mt-1">「由尾溫起」的機械速食式功法</p>
+            <p class="text-[10px] md:text-sm opacity-80 mt-1 text-red-700 font-bold">**以下「時間管理大法」只適用於「臨急抱佛腳」的極端情況下，強烈建議日常有規劃地做每日練習</p>
+        </div>
+
+        <div class="block-area no-print" id="blockArea">
+            <span class="text-sm font-bold">✨ 溫習科目方塊：</span>
+            <div class="flex items-center gap-1 w-full md:w-auto justify-center">
+                <input type="text" id="newSubjectInput" class="border-2 border-latte rounded-lg px-2 py-1 text-xs 
+outline-none w-32" placeholder="新增科目(如: 物理)">
+                <button onclick="addNewSubject()" class="bg-mocha text-white rounded-lg px-4 py-1 text-xs font-bold">+</button>
+            </div>
+        </div>
+
+        <div class="controls no-print">
+            <div class="flex items-center gap-2 justify-center">
+                <label class="text-xs font-bold">天數：</label>
+         
+              <input type="range" min="7" max="28" step="7" value="14" class="w-24" id="daysRange" oninput="updateDays(this.value)">
+                <span id="daysDisplay" class="text-xs font-bold">14 天</span>
+            </div>
+            <div class="btn-group">
+                <button onclick="openStudyMethod()" class="btn-main btn-method">💡 三次做卷法</button>
+                <button onclick="downloadOriginalPDF()" class="btn-main btn-download">📄 
+範本 PDF</button>
+                <button onclick="window.print()" class="btn-main">🖨️ 列印</button>
+                <button onclick="resetData()" class="btn-main" style="background-color: #A08080;">🔄 重置</button>
+            </div>
+        </div>
+
+        <div class="calendar-scroll-wrapper">
+            <div class="calendar-grid" id="calendar">
+                
+        <div class="day-header">SUN 日</div>
+                <div class="day-header">MON 一</div>
+                <div class="day-header">TUE 二</div>
+                <div class="day-header">WED 三</div>
+                <div class="day-header">THU 四</div>
+                <div class="day-header">FRI 五</div>
+        
+        <div class="day-header">SAT 六</div>
+            </div>
+        </div>
+
+        <div class="note-section">
+            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs">
+                <h3 class="font-bold mb-1">💡 溫習秘訣</h3>
+                <ul class="space-y-1 opacity-80">
+      
+              <li>1.
+填寫考試日後，按「由尾溫起」順序安排。</li>
+                    <li>2.
+善用自定義方塊，將複雜科目拆解成小部分。</li>
+                    <li>3.
+考前一天強烈建議配合「三次做卷法」進行最後衝刺。</li>
+                    <li>4.
+點擊日子右上角的圓圈可標記「已完成」，專注剩下進度！</li>
+                </ul>
+            </div>
+            <div class="p-3 bg-blue-50 rounded-xl border border-blue-100 text-xs">
+                <h3 class="font-bold mb-1">🍦 操作提示</h3>
+                <p class="opacity-80 mb-1">1.
+本工具支援手機拖拽填寫。若月曆顯示不全，請左右滑動查看所有日子。</p>
+                <p class="opacity-80 mb-1">2.
+另外本工具可以自由新增科目方塊，並只能拖動至「溫習」項目。</p>
+                <p class="opacity-80">3.
+標記為已完成的日子會變為灰色，方便你一眼看出還有多少挑戰等著你！</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="daily-view" class="view-content">
+        <div class="title-banner">
+            <h1>⏱️ 每日時間表</h1>
+            <p class="text-[10px] md:text-sm opacity-85 mt-1">開始安排你的每天時間表！</p>
+            <p class="text-[10px] md:text-sm opacity-60 mt-1">使用手則：1.先按工作事項重要程度列表 2.預計時間 3.倒數挑戰 4.自動檢核達標</p>
+        </div>
+
+     
+   <div class="no-print bg-[#EFE5D9] p-4 rounded-xl mb-6 shadow-inner">
+            <div class="flex flex-col md:flex-row gap-3 items-end">
+                <div class="flex-1 w-full">
+                    <label class="block text-xs font-bold mb-1">工作清單 / 溫習項目：</label>
+                    <input type="text" id="taskName" class="w-full border-2 border-latte rounded-lg px-3 py-2 text-sm 
+outline-none bg-white" placeholder="例如：數學分數 10題">
+                </div>
+                <div class="w-full md:w-36">
+                    <label class="block text-xs font-bold mb-1">預計時間 (分鐘)：</label>
+                    <input type="number" id="taskEstimate" class="w-full border-2 border-latte rounded-lg px-3 py-2 text-sm outline-none bg-white" placeholder="15">
+      
+          </div>
+                <button onclick="addTask()" class="w-full md:w-auto bg-latte text-brown px-6 py-2 rounded-lg font-bold text-sm shadow active:scale-95 transition-all whitespace-nowrap">＋ 新增項目</button>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap justify-end gap-2 mb-6 no-print">
+            <a href="https://drive.google.com/file/d/1hqePCDbgYEVHBWR981M0TxMbFnFi4Jjk/view?usp=sharing" target="_blank" class="btn-main">📄 範本 PDF</a>
+        
+    <button onclick="window.print()" class="btn-main btn-download">🖨️ 列印時間表</button>
+            <button onclick="resetDailyTasks()" class="btn-main" style="background-color: #A08080;">🔄 重設時間表</button>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="daily-table">
+                <thead>
+                    <tr>
+ 
+                       <th width="5%" class="no-print">排序</th>
+                        <th width="30%">工作清單/溫習項目</th>
+                        <th width="14%">預計時間</th>
+                        <th 
+width="23%">計時倒數</th>
+                        <th width="10%">完成</th>
+                        <th width="12%">達標</th>
+                        <th width="6%" class="no-print">操作</th>
+                    </tr>
+    
+            </thead>
+                <tbody id="taskList">
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-8 p-3 bg-orange-50 rounded-xl border border-orange-100 no-print text-xs">
+           
+ <p class="text-orange-800 leading-relaxed">
+            <b>🔥 倒數挑戰說明：</b><br>
+            1. 點擊「▶ 開始」即啟動計時。<br>
+            2. 若在時間結束前點擊「🛑 結束」，系統會自動對比預計時間，判定為 <b>✅ 達標</b>。<br>
+            3. 若想重新挑戰，可點擊「🕒 重新」。<br>
+            4. <b>新功能：</b>按住左側的「☰」符號可上下拖動任務來重新安排順序！<br>
+            5. <b>密技：</b>您可以直接<b>「雙擊」</b>任務名稱或預計時間，來進行快速更改並自動重設。
+            </p>
+  
+      </div>
+    </div>
+
+    <div class="text-center mt-10 opacity-30 text-[9px] no-print">
+        - ART.IS.A.STORY |
+自定義溫習計畫工具 | 網頁由 Google Gemini 製作 -
+    </div>
+</div>
+
+<script>
+    const appId = 'study_v4';
+const calendar = document.getElementById('calendar');
+    const blockArea = document.getElementById('blockArea');
+    const newSubjectInput = document.getElementById('newSubjectInput');
+    const touchGhost = document.getElementById('touch-ghost');
+    
+    let currentDays = 14;
+let subjects = ["📚 中文", "📐 數學", "🇬🇧 英文", "🌍 常識", "🧪 科學", "🍦 休息", "📝 模擬卷"];
+let dailyTasks = []; 
+    let activeTouchData = null;
+
+    // 手機版拖拽排序專用變數
+    let activeRowTouch = null;
+let initialTouchY = 0;
+    let activeRowElement = null;
+
+    // 新增：追蹤目前被放大顯示的任務 ID
+    let currentZoomedTaskId = null;
+
+    function init() {
+        const savedSubjects = localStorage.getItem(`${appId}_subjects`);
+if (savedSubjects) subjects = JSON.parse(savedSubjects);
+
+        const savedTasks = localStorage.getItem(`${appId}_daily_tasks`);
+        if (savedTasks) dailyTasks = JSON.parse(savedTasks);
+if (dailyTasks.length === 0) {
+            dailyTasks = [
+                { id: 1, name: "數學 分數10題", estimate: 15, remainingSeconds: 900, elapsedSeconds: 0, isRunning: false, completed: false, achievement: 'pending' },
+                { id: 2, name: "數學 小數10題", estimate: 15, remainingSeconds: 900, elapsedSeconds: 0, isRunning: false, completed: false, achievement: 'pending' }
+            ];
+saveTasks();
+        }
+
+        renderSubjects();
+        renderCalendar();
+        renderTasks();
+        startGlobalTimer(); 
+        initDragSort();
+}
+
+    function switchTab(viewId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+if (viewId === 'calendar-view') document.getElementById('btn-calendar').classList.add('active');
+        if (viewId === 'daily-view') document.getElementById('btn-daily').classList.add('active');
+        
+        document.getElementById(viewId).classList.add('active');
+}
+
+    function renderSubjects() {
+        blockArea.querySelectorAll('.draggable-item').forEach(i => i.remove());
+subjects.forEach((sub, index) => {
+            const div = document.createElement('div');
+            div.className = 'draggable-item';
+            div.setAttribute('draggable', 'true');
+            div.innerHTML = `${sub} <span class="text-[8px] text-red-400 ml-1 cursor-pointer no-print" onclick="event.stopPropagation(); deleteSubject(${index})">✕</span>`;
+            
+            div.addEventListener('dragstart', (e) => { e.dataTransfer.setData("text", sub); });
+   
+         div.addEventListener('touchstart', (e) => handleTouchStart(e, sub), { passive: false });
+            div.addEventListener('touchmove', handleTouchMove, { passive: false });
+            div.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+            blockArea.insertBefore(div, blockArea.lastElementChild);
+        });
+localStorage.setItem(`${appId}_subjects`, JSON.stringify(subjects));
+    }
+
+    function renderCalendar() {
+        const headers = Array.from(calendar.querySelectorAll('.day-header'));
+calendar.innerHTML = '';
+        headers.forEach(h => calendar.appendChild(h));
+
+        for (let i = 1; i <= currentDays; i++) {
+            const cell = document.createElement('div');
+const savedData = JSON.parse(localStorage.getItem(`${appId}_cell_${i}`) || '{"exam":"", "study":"", "notes":"", "completed":false}');
+            
+            cell.id = `day-cell-${i}`;
+            cell.className = `day-cell ${savedData.completed ? 'is-completed' : ''}`;
+cell.addEventListener('dragover', (e) => e.preventDefault());
+            cell.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (savedData.completed) return;
+                const data = e.dataTransfer.getData("text");
+                const input = document.getElementById(`study-input-${i}`);
+                input.value = "溫習：" + data;
+ 
+               saveData(i, 'study', input.value);
+            });
+cell.innerHTML = `
+                <div class="cell-top">
+                    <div class="cell-date">DAY ${i}</div>
+                    <div class="complete-toggle no-print" onclick="toggleComplete(${i})">${savedData.completed ?
+'✓' : ''}</div>
+                </div>
+                <input type="text" class="input-area exam-tag" placeholder="✍️ 考試" value="${savedData.exam || ''}" onchange="saveData(${i}, 'exam', this.value)" ${savedData.completed ?
+'readonly' : ''}>
+                <input type="text" class="input-area exam-tag" placeholder="✍️ 考試" value="${savedData.exam || ''}" onchange="saveData(${i}, 'exam', this.value)" ${savedData.completed ?
+'readonly' : ''}>
+                <input type="text" id="study-input-${i}" class="input-area study-tag" placeholder="📖 溫習" value="${savedData.study || ''}" onchange="saveData(${i}, 'study', this.value)" ${savedData.completed ?
+'readonly' : ''}>
+                <textarea class="input-area text-[9px]" style="height: 40px; resize: none; background:transparent;"
+placeholder="溫習內容/備註..." onchange="saveData(${i}, 'notes', this.value)" ${savedData.completed ? 'readonly' : ''}>${savedData.notes ||
+''}</textarea>
+            `;
+            calendar.appendChild(cell);
+}
+    }
+
+    function addNewSubject() {
+        const name = newSubjectInput.value.trim();
+if (name) { subjects.push(name); newSubjectInput.value = ''; renderSubjects(); }
+    }
+
+    function deleteSubject(index) { subjects.splice(index, 1);
+renderSubjects(); }
+
+    function updateDays(val) {
+        currentDays = parseInt(val);
+document.getElementById('daysDisplay').innerText = val + ' 天';
+        renderCalendar();
+    }
+
+    function saveData(id, field, value) {
+        let data = JSON.parse(localStorage.getItem(`${appId}_cell_${id}`) || '{}');
+data[field] = value;
+        localStorage.setItem(`${appId}_cell_${id}`, JSON.stringify(data));
+    }
+
+    function toggleComplete(id) {
+        let data = JSON.parse(localStorage.getItem(`${appId}_cell_${id}`) || '{}');
+data.completed = !data.completed;
+        localStorage.setItem(`${appId}_cell_${id}`, JSON.stringify(data));
+        renderCalendar();
+    }
+
+    function resetData() {
+        if(confirm('確定要清空月曆計畫的所有內容嗎？')) {
+            for(let i=1; i<=28; i++) localStorage.removeItem(`${appId}_cell_${i}`);
+renderCalendar();
+        }
+    }
+
+    function downloadOriginalPDF() { window.open('https://drive.google.com/file/d/10zot_T1xmTJyv-WwcoJ2X10bbOPAK4_5/view?usp=sharing', '_blank');
+}
+    function openStudyMethod() { window.open('https://drive.google.com/file/d/1ABXGGhYRP7spVSs7BjsSLOK5NtKKzbPx/view?usp=sharing', '_blank'); }
+
+    function addTask() {
+        const name = document.getElementById('taskName').value.trim();
+const est = parseInt(document.getElementById('taskEstimate').value) || 0;
+        if (!name) return;
+        const newTask = {
+            id: Date.now(),
+            name: name,
+            estimate: est,
+            remainingSeconds: est * 60,
+            elapsedSeconds: 0, 
+            isRunning: false,
+       
+    completed: false,
+            achievement: 'pending' 
+        };
+dailyTasks.push(newTask);
+        document.getElementById('taskName').value = '';
+        document.getElementById('taskEstimate').value = '';
+        saveTasks();
+        renderTasks();
+    }
+
+    function toggleTimer(taskId) {
+        dailyTasks = dailyTasks.map(t => {
+            if (t.id === taskId && !t.completed) return { ...t, isRunning: !t.isRunning };
+            return { ...t, isRunning: false };
+        });
+saveTasks();
+        renderTasks();
+        updateZoomModalIfActive(); // 更新放大視窗狀態
+    }
+
+    function resetTimer(taskId) {
+        dailyTasks = dailyTasks.map(t => {
+            if (t.id === taskId) {
+                return { 
+                    ...t, 
+                    remainingSeconds: t.estimate * 60, 
+ 
+                  elapsedSeconds: 0, 
+                    isRunning: false, 
+                    completed: false, 
+                    achievement: 'pending' 
+             
+  };
+            }
+            return t;
+        });
+saveTasks();
+        renderTasks();
+        updateZoomModalIfActive(); // 更新放大視窗狀態
+    }
+
+    function finishTask(taskId) {
+        dailyTasks = dailyTasks.map(t => {
+            if (t.id === taskId && !t.completed) {
+                const status = t.remainingSeconds >= 0 ? 'success' : 'fail';
+                return { ...t, completed: true, isRunning: false, achievement: status };
+            
+}
+            return t;
+        });
+saveTasks();
+        renderTasks();
+        updateZoomModalIfActive(); // 更新放大視窗狀態
+    }
+
+    function deleteTask(taskId) {
+        if (currentZoomedTaskId === taskId) closeZoomModal(null); // 如果正在放大就關閉
+        dailyTasks = dailyTasks.filter(t => t.id !== taskId);
+saveTasks();
+        renderTasks();
+    }
+
+    function resetDailyTasks() {
+        if(confirm('確定要清空今天時間表的所有項目嗎？（所有項目都需要重新輸入）')) {
+            closeZoomModal(null);
+            dailyTasks = [];
+saveTasks();
+            renderTasks();
+        }
+    }
+
+    function editTaskName(taskId) {
+        const task = dailyTasks.find(t => t.id === taskId);
+if (!task) return;
+        const newName = prompt('請輸入新的工作名稱：', task.name);
+        if (newName !== null && newName.trim() !== "") {
+            dailyTasks = dailyTasks.map(t => {
+                if (t.id === taskId) return { ...t, name: newName.trim() };
+                return t;
+            });
+saveTasks();
+            renderTasks();
+            updateZoomModalIfActive();
+        }
+    }
+
+    function editTaskEstimate(taskId) {
+        const task = dailyTasks.find(t => t.id === taskId);
+if (!task) return;
+        const newEst = prompt('請輸入新的預計時間（分鐘）：', task.estimate);
+        if (newEst !== null && !isNaN(newEst) && parseInt(newEst) > 0) {
+            const estMinutes = parseInt(newEst);
+dailyTasks = dailyTasks.map(t => {
+                if (t.id === taskId) {
+                    return { 
+                        ...t, 
+                        estimate: estMinutes,
+    
+                   remainingSeconds: estMinutes * 60,
+                        elapsedSeconds: 0,
+                        isRunning: false,
+                        completed: false,
+  
+                     achievement: 'pending'
+                    };
+                }
+                return t;
+            });
+saveTasks();
+            renderTasks();
+            updateZoomModalIfActive();
+        }
+    }
+
+    function formatTime(seconds) {
+        const isNegative = seconds < 0;
+const absSeconds = Math.abs(seconds);
+        const mins = Math.floor(absSeconds / 60);
+        const secs = absSeconds % 60;
+        return `${isNegative ?
+'-' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function renderTasks() {
+        const list = document.getElementById('taskList');
+if (!list) return;
+        list.innerHTML = '';
+
+        dailyTasks.forEach(t => {
+            const row = document.createElement('tr');
+            row.className = `daily-row ${t.completed ? 'opacity-70' : ''}`;
+            row.setAttribute('draggable', 'true');
+            row.setAttribute('data-id', t.id);
+            
+            let badge = t.achievement === 'success' ? 'status-success' 
+: (t.achievement === 'fail' ? 'status-fail' : 'status-pending');
+            let badgeText = t.achievement === 'success' ? '✅ 達標' : (t.achievement === 'fail' ? '⚠️ 超時' : '挑戰中');
+
+            row.innerHTML = `
+                <td class="text-center no-print"><span class="drag-handle">☰</span></td>
+                <td class="pl-2 font-bold text-sm editable-cell no-print-area" id="name-cell-${t.id}">${t.name}</td>
+         
+      <td class="text-center text-sm editable-cell no-print-area" id="est-cell-${t.id}">${t.estimate} 分鐘</td>
+                <td class="text-center">
+                    <div class="timer-display ${t.remainingSeconds < 0 ?
+'timer-expired' : ''}" id="timer-${t.id}">${formatTime(t.remainingSeconds)}</div>
+                    <div class="flex gap-1 justify-center mt-1 no-print">
+                        <button onclick="toggleTimer(${t.id})" ${t.completed ? 'disabled' : ''} class="px-2 py-1 rounded text-[10px] bg-amber-600 text-white disabled:opacity-30">${t.isRunning ? '⏸ 暫停' : '▶ 開始'}</button>
+                        <button onclick="finishTask(${t.id})" ${t.completed ? 'disabled' 
+: ''} class="px-2 py-1 rounded text-[10px] bg-red-500 text-white disabled:opacity-30">🛑 結束</button>
+                        <button onclick="resetTimer(${t.id})" class="px-2 py-1 rounded text-[10px] bg-gray-500 text-white">🕒 重新</button>
+                        <button onclick="openZoomModal(${t.id})" class="px-2 py-1 rounded text-[10px] bg-blue-500 text-white">🔍 放大</button>
+                    </div>
+                </td>
+                <td class="text-center text-xs">
+     
+              ${t.completed ? `已用: ${formatTime(t.elapsedSeconds)}` : '-'}
+                </td>
+                <td class="text-center"><span class="status-badge ${badge}">${badgeText}</span></td>
+                <td class="text-center no-print"><button onclick="deleteTask(${t.id})" class="text-red-400">✕</button></td>
+            `;
+list.appendChild(row);
+
+            // 處理雙擊修改相容性 (同時支援電腦雙擊與手機雙觸發)
+            setupMobileFriendlyDblClick(document.getElementById(`name-cell-${t.id}`), () => editTaskName(t.id));
+setupMobileFriendlyDblClick(document.getElementById(`est-cell-${t.id}`), () => editTaskEstimate(t.id));
+
+            // 為手機版排序注入觸摸事件
+            const handle = row.querySelector('.drag-handle');
+setupMobileRowDrag(handle, row);
+        });
+    }
+
+    // 新增：放大畫面彈窗的邏輯
+    function openZoomModal(taskId) {
+        currentZoomedTaskId = taskId;
+        document.getElementById('zoom-modal-overlay').style.display = 'flex';
+        updateZoomModalIfActive();
+    }
+
+    function closeZoomModal(e) {
+        if (e === null || e.target === document.getElementById('zoom-modal-overlay') || e.target.classList.contains('zoom-close-btn')) {
+            document.getElementById('zoom-modal-overlay').style.display = 'none';
+            currentZoomedTaskId = null;
+        }
+    }
+
+    function updateZoomModalIfActive() {
+        if (!currentZoomedTaskId) return;
+        const task = dailyTasks.find(t => t.id === currentZoomedTaskId);
+        if (!task) {
+            closeZoomModal(null);
+            return;
+        }
+
+        // 更新項目名稱
+        document.getElementById('zoom-task-name').innerText = task.name;
+        
+        // 更新時間與樣式
+        const timerEl = document.getElementById('zoom-timer-display');
+        timerEl.innerText = formatTime(task.remainingSeconds);
+        if (task.remainingSeconds < 0) {
+            timerEl.classList.add('zoom-timer-expired');
+        } else {
+            timerEl.classList.remove('zoom-timer-expired');
+        }
+
+        // 更新按鈕文字狀態
+        const startBtn = document.getElementById('zoom-btn-start');
+        startBtn.innerText = task.isRunning ? '⏸ 暫停' : '▶ 開始';
+        
+        // 如果任務已完成，停用相關按鈕
+        document.getElementById('zoom-btn-start').disabled = task.completed;
+        document.getElementById('zoom-btn-finish').disabled = task.completed;
+        
+        // 調整不透明度表現已完成
+        document.getElementById('zoom-btn-start').style.opacity = task.completed ? '0.3' : '1';
+        document.getElementById('zoom-btn-finish').style.opacity = task.completed ? '0.3' : '1';
+    }
+
+    // 彈窗專屬對接原版功能的觸發器
+    function zoomTriggerToggle() {
+        if (currentZoomedTaskId) toggleTimer(currentZoomedTaskId);
+    }
+    function zoomTriggerFinish() {
+        if (currentZoomedTaskId) finishTask(currentZoomedTaskId);
+    }
+    function zoomTriggerReset() {
+        if (currentZoomedTaskId) resetTimer(currentZoomedTaskId);
+    }
+
+    // 手機/電腦通用雙擊判定優化
+    function setupMobileFriendlyDblClick(element, callback) {
+        element.addEventListener('dblclick', callback);
+let lastTap = 0;
+        element.addEventListener('touchstart', function(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+                e.preventDefault();
+                callback();
+         
+  }
+            lastTap = currentTime;
+        });
+}
+
+    // 手機版表格行拖曳排序注入
+    function setupMobileRowDrag(handle, row) {
+        handle.addEventListener('touchstart', function(e) {
+            activeRowTouch = e.touches[0];
+            initialTouchY = activeRowTouch.clientY;
+            activeRowElement = row;
+            activeRowElement.classList.add('dragging');
+        }, { passive: true });
+handle.addEventListener('touchmove', function(e) {
+            if (!activeRowElement) return;
+            const currentTouch = e.touches[0];
+            const list = document.getElementById('taskList');
+            const afterElement = getDragAfterElement(list, currentTouch.clientY);
+            
+            if (afterElement == null) {
+          
+     list.appendChild(activeRowElement);
+            } else {
+                list.insertBefore(activeRowElement, afterElement);
+            }
+            e.preventDefault(); // 防止滾動干擾拖動
+        }, { passive: false });
+handle.addEventListener('touchend', function(e) {
+            if (!activeRowElement) return;
+            activeRowElement.classList.remove('dragging');
+            
+            const list = document.getElementById('taskList');
+            const rows = Array.from(list.querySelectorAll('.daily-row'));
+            const newOrderIds = rows.map(r => parseInt(r.getAttribute('data-id')));
+            
+ 
+          const reorderedTasks = [];
+            newOrderIds.forEach(id => {
+                const task = dailyTasks.find(t => t.id === id);
+                if (task) reorderedTasks.push(task);
+            });
+            
+       
+    dailyTasks = reorderedTasks;
+            saveTasks();
+            
+            activeRowElement = null;
+        });
+}
+
+    function initDragSort() {
+        const list = document.getElementById('taskList');
+list.addEventListener('dragstart', e => {
+            if (e.target.classList.contains('daily-row')) {
+                e.target.classList.add('dragging');
+            }
+        });
+list.addEventListener('dragend', e => {
+            if (e.target.classList.contains('daily-row')) {
+                e.target.classList.remove('dragging');
+                const rows = Array.from(list.querySelectorAll('.daily-row'));
+                const newOrderIds = rows.map(row => parseInt(row.getAttribute('data-id')));
+                
+           
+    const reorderedTasks = [];
+                newOrderIds.forEach(id => {
+                    const task = dailyTasks.find(t => t.id === id);
+                    if (task) reorderedTasks.push(task);
+                });
+         
+      
+                dailyTasks = reorderedTasks;
+                saveTasks();
+            }
+        });
+list.addEventListener('dragover', e => {
+            e.preventDefault();
+            const draggingElement = list.querySelector('.dragging');
+            if (!draggingElement) return;
+            
+            const afterElement = getDragAfterElement(list, e.clientY);
+            if (afterElement == null) {
+            
+   list.appendChild(draggingElement);
+            } else {
+                list.insertBefore(draggingElement, afterElement);
+            }
+        });
+}
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.daily-row:not(.dragging)')];
+return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+    
+           return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+    function startGlobalTimer() {
+        setInterval(() => {
+            let needsSave = false;
+            dailyTasks.forEach(t => {
+                if (t.isRunning) {
+                    t.remainingSeconds--;
+                 
+  t.elapsedSeconds++;
+                    needsSave = true;
+                    const timerEl = document.getElementById(`timer-${t.id}`);
+                    if (timerEl) {
+                        timerEl.innerText = formatTime(t.remainingSeconds);
+    
+                   if (t.remainingSeconds < 0) timerEl.classList.add('timer-expired');
+                    }
+                }
+            });
+            if (needsSave) {
+                saveTasks();
+                updateZoomModalIfActive(); // 當有計時更新且放大畫面開著時，同步刷新放大畫面
+            }
+        }, 1000);
+}
+
+    function saveTasks() {
+        localStorage.setItem(`${appId}_daily_tasks`, JSON.stringify(dailyTasks));
+}
+
+    function handleTouchStart(e, text) {
+        const touch = e.touches[0];
+activeTouchData = text;
+        touchGhost.innerText = text;
+        touchGhost.style.display = 'block';
+        touchGhost.style.left = touch.clientX + 'px';
+        touchGhost.style.top = touch.clientY + 'px';
+}
+
+    function handleTouchMove(e) {
+        if (!activeTouchData) return;
+const touch = e.touches[0];
+        touchGhost.style.left = touch.clientX + 'px';
+        touchGhost.style.top = touch.clientY + 'px';
+        
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+const cell = target ? target.closest('.day-cell') : null;
+
+        document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('drag-over'));
+if (cell && !cell.classList.contains('is-completed')) {
+            cell.classList.add('drag-over');
+}
+        e.preventDefault();
+    }
+
+    function handleTouchEnd(e) {
+        if (!activeTouchData) return;
+const touch = e.changedTouches[0];
+        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+        const cell = target ? target.closest('.day-cell') : null;
+if (cell && !cell.classList.contains('is-completed')) {
+            const dayId = cell.id.replace('day-cell-', '');
+const input = document.getElementById(`study-input-${dayId}`);
+            input.value = "溫習：" + activeTouchData;
+            saveData(dayId, 'study', input.value);
+            cell.classList.remove('drag-over');
+}
+
+        touchGhost.style.display = 'none';
+        activeTouchData = null;
+}
+
+    window.onload = init;
+</script>
+
+</body>
+</html>
